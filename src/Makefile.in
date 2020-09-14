@@ -1,0 +1,73 @@
+# @configure_input@
+
+#
+#  Makefile.in
+#
+#  Copyright © 2020 by Blockchain Commons, LLC
+#  Licensed under the "BSD-2-Clause Plus Patent License"
+#
+
+# Package-specific substitution variables
+package = @PACKAGE_NAME@
+version = @PACKAGE_VERSION@
+tarname = @PACKAGE_TARNAME@
+libname = lib$(package).a
+
+# Prefix-specific substitution variables
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+bindir = @bindir@
+
+# VPATH-specific substitution variables
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+# Terminal colors
+RED=`tput setaf 1`
+GREEN=`tput setaf 2`
+RESET=`tput sgr0`
+
+CFLAGS += -g -O0
+ARFLAGS = rcs
+
+OBJS = encoding.o
+
+.PHONY: all lib
+all lib: $(libname)
+
+$(libname): $(OBJS)
+	$(AR) $(ARFLAGS) $@ $^
+
+encoding.o: encoding.h shard.h group.h sskr-errors.h
+
+HEADERS = bc-sskr.h group.h encoding.h shard.h sskr-errors.h
+
+libdir = $(DESTDIR)/$(prefix)/lib
+includedir = $(DESTDIR)/$(prefix)/include/$(package)
+
+.PHONY: install
+install: $(libname)
+	install -d $(libdir)
+	install $(libname) $(libdir)
+	install -d $(includedir)
+	install $(HEADERS) $(includedir)
+
+.PHONY: uninstall
+uninstall:
+	rm -f $(libdir)/$(libname)
+	rm -f $(includedir)/bc-sskr.h
+	rm -f $(includedir)/sskr-errors.h
+	rm -f $(includedir)/encoding.h
+	rm -f $(includedir)/group.h
+	rm -f $(includedir)/shard.h
+	-rmdir $(libdir) >/dev/null 2>&1
+	-rmdir $(includedir) >/dev/null 2>&1
+
+.PHONY: clean
+clean:
+	rm -rf $(libname)
+	rm -f $(OBJS)
+
+.PHONY: distclean
+distclean: clean
+	rm -f Makefile
