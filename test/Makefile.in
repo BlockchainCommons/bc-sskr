@@ -33,7 +33,7 @@ CFLAGS += -g -O0
 all: test
 
 TEST_OBJS = test.o test-utils.o
-LDFLAGS += -lbc-crypto-base -lbc-shamir
+LDLIBS += -lbc-shamir -lbc-crypto-base
 
 libdir = ../src
 lib = $(libdir)/$(libname)

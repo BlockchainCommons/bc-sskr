@@ -475,4 +475,3 @@ int sskr_combine(
 
     return result;
 }
-

@@ -10,6 +10,7 @@
 
 #include <stdlib.h>
 #include "group.h"
+#include <stdint.h>
 
 #define METADATA_LENGTH_BYTES 5
 #define MIN_STRENGTH_BYTES 16
