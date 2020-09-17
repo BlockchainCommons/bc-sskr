@@ -42,8 +42,8 @@ encoding.o: encoding.h shard.h group.h sskr-errors.h
 
 HEADERS = bc-sskr.h group.h encoding.h shard.h sskr-errors.h
 
-libdir = $(DESTDIR)/$(prefix)/lib
-includedir = $(DESTDIR)/$(prefix)/include/$(package)
+libdir = $(DESTDIR)$(prefix)/lib
+includedir = $(DESTDIR)$(prefix)/include/$(package)
 
 .PHONY: install
 install: $(libname)
