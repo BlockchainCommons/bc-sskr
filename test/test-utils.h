@@ -18,7 +18,7 @@ size_t hex_to_data(const char *hex, uint8_t **out);
 bool equal_strings(const char* a, const char* b);
 void test_hex();
 
-void fake_random(uint8_t *buf, size_t count);
+void fake_random(uint8_t *buf, size_t count, void* ctx);
 
 uint8_t* alloc_uint8_buffer(size_t len, uint8_t value);
 uint16_t* alloc_uint16_buffer(size_t len, uint16_t value);

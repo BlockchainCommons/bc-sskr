@@ -83,7 +83,7 @@ void test_hex() {
 }
 
 // Clearly not random. Only use for tests.
-void fake_random(uint8_t *buf, size_t count) {
+void fake_random(uint8_t *buf, size_t count, void* ctx) {
     static bool seeded = false;
     if(!seeded) {
         srand(1234567);

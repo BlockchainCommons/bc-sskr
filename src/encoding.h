@@ -51,7 +51,8 @@ int sskr_generate(
     size_t *shard_len,
     uint8_t *output,
     size_t buffer_size,
-    void (*random_generator)(uint8_t *, size_t)
+    void* ctx,
+    void (*random_generator)(uint8_t *, size_t, void*)
 );
 
 

@@ -130,7 +130,8 @@ static int generate_shards(
     size_t master_secret_len,
     sskr_shard *shards,
     uint16_t shards_size,
-    void (*random_generator)(uint8_t *, size_t)
+    void* ctx,
+    void (*random_generator)(uint8_t *, size_t, void*)
 ) {
 
     if(master_secret_len < MIN_STRENGTH_BYTES) {
@@ -149,7 +150,7 @@ static int generate_shards(
 
     // assign a random identifier
     uint16_t identifier = 0;
-    random_generator((uint8_t *)(&identifier), 2);
+    random_generator((uint8_t *)(&identifier), 2, ctx);
 
     if(shards_size < total_shards) {
         return ERROR_INSUFFICIENT_SPACE;
@@ -165,7 +166,7 @@ static int generate_shards(
 
     uint8_t group_shares[master_secret_len * groups_len];
 
-    split_secret(group_threshold, groups_len, master_secret, master_secret_len, group_shares, random_generator);
+    split_secret(group_threshold, groups_len, master_secret, master_secret_len, group_shares, ctx, random_generator);
 
     uint8_t *group_share = group_shares;
 
@@ -174,7 +175,7 @@ static int generate_shards(
 
     for(uint8_t i=0; i<groups_len; ++i, group_share += master_secret_len) {
         uint8_t member_shares[master_secret_len *groups[i].count];
-        split_secret(groups[i].threshold, groups[i].count, group_share, master_secret_len, member_shares, random_generator);
+        split_secret(groups[i].threshold, groups[i].count, group_share, master_secret_len, member_shares, ctx, random_generator);
 
         uint8_t *value = member_shares;
         for(uint8_t j=0; j< groups[i].count; ++j, value += master_secret_len) {
@@ -216,7 +217,8 @@ int sskr_generate(
     size_t *shard_len,
     uint8_t *output,
     size_t buffer_size,
-    void (*random_generator)(uint8_t *, size_t)
+    void* ctx,
+    void (*random_generator)(uint8_t *, size_t, void*)
 ) {
     if(master_secret_len < MIN_STRENGTH_BYTES) {
         return ERROR_SECRET_TOO_SHORT;
@@ -241,7 +243,7 @@ int sskr_generate(
     sskr_shard shards[total_shards];
 
     // generate shards
-    total_shards = generate_shards(group_threshold, groups, groups_len, master_secret, master_secret_len, shards, total_shards, random_generator);
+    total_shards = generate_shards(group_threshold, groups, groups_len, master_secret, master_secret_len, shards, total_shards, ctx, random_generator);
 
     if(total_shards < 0) {
         error = total_shards;

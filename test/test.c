@@ -31,7 +31,7 @@ static void test1() {
     size_t expected_shard_len = master_secret_len + METADATA_LENGTH_BYTES;
     size_t buffer_len = 20 * expected_shard_len;
     uint8_t output[buffer_len];
-    int shard_count = sskr_generate(group_threshold, groups, groups_len, master_secret, master_secret_len, &shard_len, output, buffer_len, fake_random);
+    int shard_count = sskr_generate(group_threshold, groups, groups_len, master_secret, master_secret_len, &shard_len, output, buffer_len, NULL, fake_random);
     assert(shard_count == expected_shard_count);
     assert(shard_len == expected_shard_len);
 
