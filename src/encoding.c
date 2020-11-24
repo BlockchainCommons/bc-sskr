@@ -156,10 +156,6 @@ static int generate_shards(
         return ERROR_INSUFFICIENT_SPACE;
     }
 
-    if(master_secret_len % 2 == 1) {
-        return ERROR_INVALID_SECRET_LENGTH;
-    }
-
     if(group_threshold > groups_len) {
         return ERROR_INVALID_GROUP_THRESHOLD;
     }
@@ -171,7 +167,7 @@ static int generate_shards(
     uint8_t *group_share = group_shares;
 
     unsigned int shards_count = 0;
-    sskr_shard *shard = &shards[shards_count];
+    sskr_shard *shard;
 
     for(uint8_t i=0; i<groups_len; ++i, group_share += master_secret_len) {
         uint8_t member_shares[master_secret_len *groups[i].count];
@@ -306,7 +302,7 @@ static int combine_shards_internal(
     sskr_group groups[16];
     size_t secret_len = 0;
 
-    for(unsigned int i=0; !error && i<shards_count; ++i) {
+    for(unsigned int i=0; i<shards_count; ++i) {
         sskr_shard *shard = &shards[i];
 
         if( i == 0) {

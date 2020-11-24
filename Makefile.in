@@ -33,8 +33,8 @@ all clean:
 	cd src && $(MAKE) $@
 	cd test && $(MAKE) $@
 
-.PHONY: lib install uninstall
-lib install uninstall:
+.PHONY: lib install uninstall lint
+lib install uninstall lint:
 	cd src && $(MAKE) $@
 
 .PHONY: test check

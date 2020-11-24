@@ -71,3 +71,7 @@ clean:
 .PHONY: distclean
 distclean: clean
 	rm -f Makefile
+
+.PHONY: lint
+lint:
+	cppcheck --enable=all --inline-suppr --suppress=unusedFunction --suppress=missingInclude .

@@ -32,9 +32,12 @@ Before accepting a PR that can affect build or unit tests, make sure the followi
 
 ```bash
 $ ./configure
+$ make lint
 $ make distcheck
 $ make distclean
 ```
+
+`make lint` uses [Cppcheck](https://en.wikipedia.org/wiki/Cppcheck) to perform static analysis on the code. All PRs should pass with no warnings.
 
 `make distcheck` builds a distribution tarball, unpacks it, then configures, builds, and runs unit tests from it, then performs an install and uninstall from a non-system directory and makes sure the uninstall leaves it clean. `make distclean` removes all known byproduct files, and unless you've added files of your own, should leave the directory in a state that could be tarballed for distribution. After a `make distclean` you'll have to run `./configure` again.
 
