@@ -1,13 +1,15 @@
 # 🔑 Blockchain Commons SSKR
 
-Implementation of [Shamir Secret Key Recovery (SSKR)](https://github.com/BlockchainCommons/Research/blob/master/papers/bcr-2020-011-sskr.md) for use in [Blockchain Commons](https://www.BlockchainCommons.com) Software Projects.
+### _by Wolf McNally and Christopher Allen_
+
+**Blockchain Commons SSKR* is an implementation of [Shamir Secret Key Recovery (SSKR)](https://github.com/BlockchainCommons/Research/blob/master/papers/bcr-2020-011-sskr.md) for use in [Blockchain Commons](https://www.BlockchainCommons.com) Software Projects.
 
 ## Prerequisites
 
 * If [`bc-crypto-base`](https://github.com/blockchaincommons/bc-crypto-base) is not installed, the `configure` step below will fail.
 * If [`bc-shamir`](https://github.com/blockchaincommons/bc-shamir) is not installed, the `configure` step below will fail.
 
-## Installation
+## Installation Instructions
 
 ```bash
 $ ./configure
@@ -17,7 +19,7 @@ $ sudo make install
 
 This sequence runs the module's unit tests.
 
-## Use
+## Usage Instructions
 
 1. Link against `libbc-sskr.a`, `libbc-shamir.a` and `libbc-crypto-base.a`.
 2. Include the umbrella header in your code:
