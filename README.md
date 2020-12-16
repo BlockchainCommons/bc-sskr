@@ -1,8 +1,10 @@
 # 🔑 Blockchain Commons SSKR
 
-### _by Wolf McNally and Christopher Allen_
+### _by [Wolf McNally](https://www.github.com/wolfmcnally) and [Christopher Allen](https://www.github.com/ChristopherA)_
 
-**Blockchain Commons SSKR* is an implementation of [Shamir Secret Key Recovery (SSKR)](https://github.com/BlockchainCommons/Research/blob/master/papers/bcr-2020-011-sskr.md) for use in [Blockchain Commons](https://www.BlockchainCommons.com) Software Projects.
+* <img src="https://github.com/BlockchainCommons/crypto-commons/blob/master/images/logos/crypto-commons-super-simple.png" width=16 valign="bottom">&nbsp;&nbsp; ***part of the [crypto commons](https://github.com/BlockchainCommons/crypto-commons/blob/master/README.md) technology family***
+
+**Blockchain Commons SSKR** is an implementation of [Shamir Secret Key Recovery (SSKR)](https://github.com/BlockchainCommons/Research/blob/master/papers/bcr-2020-011-sskr.md) for use in [Blockchain Commons](https://www.BlockchainCommons.com) Software Projects.
 
 ## Prerequisites
 
