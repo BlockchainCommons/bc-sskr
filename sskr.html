@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Emscripten-Generated Code</title>
+  </head>
+  <body>
+    <p>Check console</p>
+    <script async type="text/javascript" src="sskr.js"></script>
+    <script>
+
+      // https://kapadia.github.io/emscripten/2013/09/13/emscripten-pointers-and-pointers.html
+      const allocateMemory = (length) => {
+        const output = new Uint16Array(length)
+        var nOutputBytes = output.length * output.BYTES_PER_ELEMENT;
+        var outputPtr = Module._malloc(nOutputBytes);
+        var heap = new Uint8Array(Module.HEAPU8.buffer, outputPtr, nOutputBytes);
+        heap.set(new Uint8Array(output.buffer));
+        return {output, heap}
+      }
+
+      const hexStringToUint8Array = (data) => {
+        var bytes = new Uint8Array(Math.ceil(data.length / 2));
+        for (var i = 0; i < bytes.length; i++) bytes[i] = parseInt(data.substr(i * 2, 2), 16);
+        return bytes
+      }
+
+      const toHexString = (bytes) =>
+        bytes.reduce((str, byte) => str + byte.toString(16).padStart(2, '0'), '');
+
+      // We need a timeout because the JS/WASM file needs some time to load. There is probably a ready event for this
+      setTimeout(() => {
+        var sskrShardCount = Module.cwrap(
+            'sskr_count_shards',	// name of C function
+            'number',	// return type
+            ['number', 'array', 'number'],	// argument types
+        );
+
+        var sskrGenerate = Module.cwrap(
+            'sskr_generate',	// name of C function
+            'number',	// return type
+            ['number', 'array', 'number', 'string', 'number', 'number', 'number', 'number' ,'number','number'],	// argument types
+        );
+
+        var sskrCombine = Module.cwrap(
+            'sskr_combine',	// name of C function
+            'number',	// return type
+            ['number', 'number', 'number', 'number', 'number'],	// argument types
+        );
+
+        const groups = new Uint16Array(16)
+        const view = new DataView(groups.buffer)
+        view.setUint16(0, 2, true)
+        view.setUint16(8, 3, true)
+        view.setUint16(16, 3, true)
+        view.setUint16(24, 5, true)
+        console.log('groups', groups)
+        const buffer = Module._malloc(groups.length);
+        Module.HEAPU16.set(groups, buffer);
+
+        const groupThreshold = 2
+
+        const expectedShardCount = sskrShardCount(groupThreshold, groups, groups.length / 8)
+        console.log('expectedShardCount', expectedShardCount)
+
+        const masterSecretString = '7daa851251002874e1a1995f0897e6b1'
+        const masterSecret = hexStringToUint8Array(masterSecretString)
+        const masterSecretLen = masterSecretString.length / 2
+        console.log('masterSecretLen', masterSecretLen)
+
+        const expectedShardLen = masterSecretLen + 5
+
+        const bufferLen = 8 * expectedShardLen
+
+        // https://emscripten.org/docs/porting/connecting_cpp_and_javascript/Interacting-with-code.html#calling-javascript-functions-as-function-pointers-from-c
+        // https://github.com/emscripten-core/emscripten/blob/master/tests/interop/test_add_function_post.js
+        var newFuncPtr = addFunction(function(bufferPointer, count, contextPointer) {
+          // Set identifier to 0, setting it to other values doesn't work as expected
+          setValue(bufferPointer, 0, '*')
+          out('Debug: Value at pointer', getValue(bufferPointer))
+          out('Debug: ' + bufferPointer + ' ' + count + ' ' + contextPointer);
+        }, 'viii');
+
+        const {output: shardLen, heap: shardLenHeap} = allocateMemory(1)
+        const {output: output, heap: outputHeap} = allocateMemory(bufferLen)
+
+        const shardCount = sskrGenerate(
+          groupThreshold,
+          groups,
+          groups.length / 8,
+          masterSecretString,
+          masterSecretString.length / 2,
+          shardLenHeap.byteOffset,
+          outputHeap.byteOffset,
+          output.length,
+          undefined,
+          newFuncPtr
+        )
+
+        console.log('shardCount', shardCount)
+        
+        if (shardCount < 0) {
+          console.log('shardCount Error')
+          return
+        }
+
+        var shardLenResult = new Uint8Array(shardLenHeap.buffer, shardLenHeap.byteOffset, shardLen.length)[0];
+        var outputResult = new Uint8Array(outputHeap.buffer, outputHeap.byteOffset, output.length);
+
+        console.log('shardLenResult', shardLenResult)
+        console.log('outputResult', outputResult)
+
+        console.log('--- ASSERT shardCount: ', shardCount === expectedShardCount, shardCount, expectedShardCount)
+        console.log('--- ASSERT shardLen: ', shardLenResult === expectedShardLen, shardLenResult, expectedShardLen)
+
+        console.log('--- SHARDS START ---')
+        const shards = []
+        for(let x = 0; x < shardCount; x++) {
+          const pos = x * expectedShardLen
+          const slice = outputResult.slice(pos, pos + expectedShardLen)
+          // console.log(slice)
+
+          // const view = new DataView(slice.buffer)
+
+          // if (x === 0) {
+          //   for(let y = 0; y < expectedShardLen; y++) {
+          //     console.log(view.getUint8(y).toString(16))
+          //   }
+          // }
+  
+  
+          const shard = toHexString(slice)
+          shards.push(shard)
+          // This doesn't seem to be a valid shard
+          console.log(shard)
+        }
+        console.log('--- SHARDS END ---')
+
+        const recovery = [
+          '00001101009be4050ec500e6e94ba77a399086359c',
+          '00001101016360e1b2bd00a5485d4ea9c221d6ef0c',
+          '00001112017f1c42f729006bd5f7484aa4b9c73c21',
+          '0000111202e5a909d4af002692857bef8a59ca1ac9',
+          '00001112039ab54b2386004d477233a52ee00d26e8',
+        ]
+
+        var width = 21;
+        var height = 5;
+
+        // https://kapadia.github.io/emscripten/2013/09/13/emscripten-pointers-and-pointers.html
+        var data = new Uint8Array(height * width);
+        var nDataBytes = data.length * data.BYTES_PER_ELEMENT;
+        var dataPtr = Module._malloc(nDataBytes);
+        var dataHeap1 = new Uint8Array(Module.HEAPU8.buffer, dataPtr, nDataBytes);
+        dataHeap1.set( new Uint8Array(data.buffer) );
+
+        var pointers = new Uint32Array(height);
+        for (var i = 0; i < pointers.length; i++) {
+          pointers[i] = dataPtr + i * data.BYTES_PER_ELEMENT * width;
+        }
+
+        // Allocate bytes needed for the array of pointers
+        var nPointerBytes = pointers.length * pointers.BYTES_PER_ELEMENT
+        var pointerPtr = Module._malloc(nPointerBytes);
+
+        // Copy array of pointers to Emscripten heap
+        var pointerHeap = new Uint8Array(Module.HEAPU8.buffer, pointerPtr, nPointerBytes);
+        pointerHeap.set( new Uint8Array(pointers.buffer) );
+
+        // Should this be 100?
+        const {output: recover, heap: recoverHeap} = allocateMemory(100)
+
+        // This doesn't work yet
+        const combineResult = sskrCombine(pointerHeap.byteOffset, width, height, recoverHeap.byteOffset, recover.length)
+        console.log('combineResult', combineResult)
+      }, 1000)
+    </script>
+  </body>
+</html>
+
+

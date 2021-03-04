@@ -12,12 +12,16 @@
 #ifdef ARDUINO
 #include "bc-shamir.h"
 #else
-#include <bc-shamir/bc-shamir.h>
+#include "../bc-shamir/src/bc-shamir.h"
 #endif
 
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 static size_t serialize_shard(
     const sskr_shard *shard,
@@ -100,6 +104,9 @@ int sskr_count_shards(
     const sskr_group_descriptor *groups,
     size_t groups_len
 ) {
+    // printf("%zu\n", group_threshold);
+    // printf("%zu\n", groups_len);
+
     size_t shard_count = 0;
 
     if(group_threshold > groups_len) {
@@ -151,6 +158,8 @@ static int generate_shards(
     // assign a random identifier
     uint16_t identifier = 0;
     random_generator((uint8_t *)(&identifier), 2, ctx);
+
+    // printf("identifier: %d\n", identifier);
 
     if(shards_size < total_shards) {
         return ERROR_INSUFFICIENT_SPACE;
@@ -216,6 +225,12 @@ int sskr_generate(
     void* ctx,
     void (*random_generator)(uint8_t *, size_t, void*)
 ) {
+    // printf("sskr_generate\n");
+
+    // printf("group_threshold %zu\n", group_threshold);
+    // printf("groups_len %zu\n", groups_len);
+    // printf("master_secret_len %zu\n", master_secret_len);
+
     if(master_secret_len < MIN_STRENGTH_BYTES) {
         return ERROR_SECRET_TOO_SHORT;
     }
@@ -229,6 +244,10 @@ int sskr_generate(
     // figure out how much space we need to store all of the mnemonics
     // and make sure that we were provided with sufficient resources
     size_t shard_length = METADATA_LENGTH_BYTES + master_secret_len;
+    // printf("expected shard_length %zu\n", shard_length);
+    // printf("expected shard_length * total_shards %zu\n", shard_length * total_shards);
+    // printf("expected buffer_size %zu\n", buffer_size);
+
     if(buffer_size < shard_length * total_shards) {
         return ERROR_INSUFFICIENT_SPACE;
     }
@@ -238,8 +257,12 @@ int sskr_generate(
     // allocate space for shard representations
     sskr_shard shards[total_shards];
 
+    // printf("generate_shards\n");
+
     // generate shards
     total_shards = generate_shards(group_threshold, groups, groups_len, master_secret, master_secret_len, shards, total_shards, ctx, random_generator);
+
+    // printf("total_shards %d\n", total_shards);
 
     if(total_shards < 0) {
         error = total_shards;
@@ -265,6 +288,8 @@ int sskr_generate(
         memset(output, 0, buffer_size);
         return 0;
     }
+
+    // printf("byte_count %d\n", byte_count);
 
     *shard_len = byte_count;
     return total_shards;
@@ -447,6 +472,12 @@ int sskr_combine(
     uint8_t *buffer,            // working space, and place to return secret
     size_t buffer_len      // total amount of working space
 ) {
+    // printf("\nsskr_combine\n");
+    // printf("shard_len %zu\n", shard_len);
+    // printf("shards_count %zu\n", shards_count);
+    // printf("buffer %s\n", buffer);
+    // printf("buffer_len %zu\n", buffer_len);
+
     int result = 0;
 
     if(shards_count == 0) {
@@ -458,6 +489,7 @@ int sskr_combine(
     for(unsigned int i=0; !result && i < shards_count; ++i) {
         shards[i].value_len = 32;
 
+        // printf("deserialize_shard\n %s %zu" ,input_shards[i], shard_len);
         int bytes = deserialize_shard(input_shards[i], shard_len, &shards[i]);
 
         if(bytes < 0) {
@@ -466,10 +498,16 @@ int sskr_combine(
     }
 
     if(!result) {
+        // printf("combine_shards_internal\n");
         result = combine_shards_internal(shards, shards_count, buffer, buffer_len);
     }
 
+    // printf("memset\n");
     memset(shards,0,sizeof(shards));
 
     return result;
 }
+
+#ifdef __cplusplus
+}
+#endif

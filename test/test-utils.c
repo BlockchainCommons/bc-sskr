@@ -89,7 +89,8 @@ void fake_random(uint8_t *buf, size_t count, void* ctx) {
         srand(1234567);
     }
     for (int i = 0; i < count; i++) {
-        buf[i] = (uint8_t)rand();
+        // buf[i] = (uint8_t)rand();
+        buf[i] = 0;
   }
 }
 

@@ -126,3 +126,16 @@ The following keys may be used to communicate sensitive information to developer
 | Christopher Allen | FDFE 14A5 4ECB 30FC 5D22  74EF F8D3 6C91 3574 05ED |
 
 You can import a key by running the following command with that individual’s fingerprint: `gpg --recv-keys "<fingerprint>"` Ensure that you put quotes around fingerprints that contain spaces.
+
+### WASM Build Instructions
+
+1. Install and activate Emscripten: https://emscripten.org/docs/getting_started/downloads.html
+2. Run `./build-wasm.sh`. This will build the `sskr.wasm` and `sskr.js` files
+3. Run `./start-server.sh` and navigate to http://localhost:8888/sskr.html
+4. Edit `sskr.html`, save and refresh browser
+
+Current issues:
+
+1. The shares that are generated don't seem to be valid
+2. The "function pointer" for the random generator doesn't work
+3. The `sskrCombine` method returns an error
