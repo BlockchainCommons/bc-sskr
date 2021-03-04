@@ -62,6 +62,7 @@ This table below also establishes provenance (repository of origin, permalink, a
 These are other projects that work with or leverage bc-sskr:
 
 - [seedtool](https://github.com/blockchaincommons/bc-seedtool-cli) — Tool for generating and transforming cryptographic seeds.
+- [LetheKit](https://github.com/BlockchainCommons/bc-lethekit) — Open source DIY hardware box for offline cryptographic tools.
 
 ### Derived from…
 
