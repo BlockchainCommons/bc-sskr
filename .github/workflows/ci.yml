@@ -5,9 +5,11 @@ jobs:
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v2
+    - run: brew install cppcheck
     - run: git clone https://github.com/BlockchainCommons/bc-crypto-base.git && cd bc-crypto-base && ./configure && make && sudo make install
     - run: git clone https://github.com/BlockchainCommons/bc-shamir.git && cd bc-shamir && ./configure && make && sudo make install
     - run: ./configure
+    - run: make lint
     - run: make check
     - run: sudo make install
     - run: make distcheck && make distclean
@@ -21,4 +23,3 @@ jobs:
     - run: ./configure && make check
     - run: sudo make install
     - run: make distcheck && make distclean
-
