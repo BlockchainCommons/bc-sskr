@@ -1,0 +1,6 @@
+[submodule "deps/bc-shamir"]
+	path = deps/bc-shamir
+	url = https://github.com/BlockchainCommons/bc-shamir.git
+[submodule "deps/bc-crypto-base"]
+	path = deps/bc-crypto-base
+	url = https://github.com/BlockchainCommons/bc-crypto-base.git
