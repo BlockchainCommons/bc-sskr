@@ -11,7 +11,3 @@ deps/bc-crypto-base/src/sha2.c deps/bc-crypto-base/src/hmac.c deps/bc-crypto-bas
  -s WASM=1 -o wasm/sskr.js -s NO_EXIT_RUNTIME=1 -s "EXTRA_EXPORTED_RUNTIME_METHODS=['ccall', 'cwrap']" \
  -s EXPORTED_FUNCTIONS="['_sskr_count_shards', '_sskr_generate', '_sskr_combine', '_malloc']" \
  -s ALLOW_MEMORY_GROWTH=1 -s ALLOW_TABLE_GROWTH \
-
-
-## TODO https://github.com/emscripten-core/emscripten/pull/4665  #ifdef __EMSCRIPTEN__
-
