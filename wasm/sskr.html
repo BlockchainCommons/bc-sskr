@@ -34,7 +34,6 @@
 			bytes.reduce((str, byte) => str + byte.toString(16).padStart(2, '0'), '');
 
 
-
 		// We need a timeout because the JS/WASM file needs some time to load. There is probably a ready event for this
 		setTimeout(() => {
 			var sskrShardCount = Module.cwrap(
@@ -48,7 +47,7 @@
 			var sskrGenerate = Module.cwrap(
 				'sskr_generate', // name of C function
 				'number', // return type
-				['number', 'array', 'number', /*'string'*/ 'array', 'number', 'number', 'number', 'number', 'number', 'number'], // argument types
+				['number', 'array', 'number', 'array', 'number', 'number', 'number', 'number', 'number', 'number'], // argument types
 			);
 
 			var sskrCombine = Module.cwrap(
@@ -60,29 +59,26 @@
 
 			const groupThreshold = 2
 
-			// TODO: document big endian, size_t vs uint32_t
-			const groups_ = new Uint8Array([2, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0, 5, 0, 0, 0]); // DELA
-
-			var expectedShardCount = ccall("sskr_count_shards", "number", ["number", "array", "number"], [groupThreshold, groups_, /*groups_.length / 2*/ 2]);
-			console.log('test: ', expectedShardCount);
-
+			// TODO: document big endian, size_t vs uint32_t.
+			const groups_ = new Uint8Array([2, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0, 5, 0, 0, 0]);
+			var expectedShardCount = ccall("sskr_count_shards", "number", ["number", "array", "number"], [groupThreshold, groups_, 2]);
 
 			const masterSecretString = '7daa851251002874e1a1995f0897e6b1'
 			const masterSecret = hexStringToUint8Array(masterSecretString)
-			const masterSecretLen = masterSecretString.length / 2
-			console.log('masterSecretLen', masterSecretLen)
-
-			const expectedShardLen = masterSecretLen + 5
-
+			const expectedShardLen = masterSecret.length + 5
 			const bufferLen = 8 * expectedShardLen
+
+			console.log("Secret to be sharded: ", masterSecretString)
+			console.log("Groups (2,3) and (3,5)")
 
 			// https://emscripten.org/docs/porting/connecting_cpp_and_javascript/Interacting-with-code.html#calling-javascript-functions-as-function-pointers-from-c
 			// https://github.com/emscripten-core/emscripten/blob/master/tests/interop/test_add_function_post.js
 			var newFuncPtr = addFunction(function(bufferPointer, count, contextPointer) {
-				// Set identifier to 0, setting it to other values doesn't work as expected
-				setValue(bufferPointer, 0, /*'*'*/ 'i32')
-				out('Debug: Value at pointer', getValue(bufferPointer, 'i32'))
-				out('Debug: ' + bufferPointer + ' ' + count + ' ' + contextPointer);
+				// this implements arandom number generator
+				// It is passed to a function pointer
+				var array = new Uint32Array(1);
+				window.crypto.getRandomValues(array);
+				setValue(bufferPointer, array[0], 'i32')
 			}, 'viii');
 
 			const {
@@ -108,53 +104,35 @@
 				newFuncPtr
 			)
 
-			console.log('shardCount', shardCount)
-
-			if (shardCount < 0) {
-				console.log('shardCount Error')
-				return
-			}
+			console.assert(shardCount >= 0, "shard count error");
 
 			var shardLenResult = new Uint8Array(shardLenHeap.buffer, shardLenHeap.byteOffset, shardLen.length)[0];
 			var outputResult = new Uint8Array(outputHeap.buffer, outputHeap.byteOffset, output.length);
 
-			console.log('shardLenResult', shardLenResult)
-			console.log('outputResult', outputResult)
+			console.assert(shardCount === expectedShardCount, "shard count is false!");
+			console.assert(shardLenResult === expectedShardLen, "shard len is false!");
 
-			console.log('--- ASSERT shardCount: ', shardCount === expectedShardCount, shardCount, expectedShardCount)
-			console.log('--- ASSERT shardLen: ', shardLenResult === expectedShardLen, shardLenResult, expectedShardLen)
-
-			console.log('--- SHARDS START ---')
 			const shards = []
 			for (let x = 0; x < shardCount; x++) {
 				const pos = x * expectedShardLen
 				const slice = outputResult.slice(pos, pos + expectedShardLen)
-
 				const shard = toHexString(slice)
 				shards.push(shard)
-				console.log(shard)
 			}
-			console.log('--- SHARDS END ---')
 
+			console.log("Shards: ", shards)
 
-			// shards (in hex) to recover from 
-			const recovery = [
-				'00001101009be4050ec500e6e94ba77a399086359c',
-				'00001101016360e1b2bd00a5485d4ea9c221d6ef0c',
-				'00001112017f1c42f729006bd5f7484aa4b9c73c21',
-				'0000111202e5a909d4af002692857bef8a59ca1ac9',
-				'00001112039ab54b2386004d477233a52ee00d26e8',
-			]
 
 			// Convert shards to binary format
+			// Let's restore from 3/3 (first group) and 3/5 (second group)
 			var width = 21;
-			var height = 5;
+			var height = 6;
 			// https://kapadia.github.io/emscripten/2013/09/13/emscripten-pointers-and-pointers.html
 			var data = new Uint8Array(height * width);
 			var _shard
 			var k = 0;
 			for (var j = 0; j < height; j++) {
-				_shard = hexStringToUint8Array(recovery[j]);
+				_shard = hexStringToUint8Array(shards[j]);
 				for (var i = 0; i < width; i++) {
 					data[k] = _shard[i];
 					k = k + 1
@@ -187,10 +165,9 @@
 			} = allocateMemory(100)
 
 			const combineResult = sskrCombine(pointerHeap.byteOffset, width, height, recoverHeap.byteOffset, recover.length)
-			console.log('combineResult', combineResult)
-
 			var outputResult = new Uint8Array(recoverHeap.buffer, recoverHeap.byteOffset, combineResult);
 			console.log('Restored seed: ', toHexString(outputResult))
+			console.assert(toHexString(outputResult) == masterSecretString, "Restored seed is false!");
 
 		}, 1000)
 	</script>
