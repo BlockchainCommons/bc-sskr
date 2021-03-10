@@ -98,5 +98,5 @@ configure.scan
 config.h
 
 # wasm
-*.wasm
+*.wasm*
 sskr.js

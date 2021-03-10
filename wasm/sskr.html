@@ -59,8 +59,9 @@
 
 			const groupThreshold = 2
 
-			// TODO: document big endian, size_t vs uint32_t.
-			const groups_ = new Uint8Array([2, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0, 5, 0, 0, 0]);
+			// We represent group {{2, 3}, {3, 5}} in a 1D array
+			const groups_ = new Uint8Array([2, 3, 3, 5]);
+			// Instead of cwrap we can also use ccall to invoke our function
 			var expectedShardCount = ccall("sskr_count_shards", "number", ["number", "array", "number"], [groupThreshold, groups_, 2]);
 
 			const masterSecretString = '7daa851251002874e1a1995f0897e6b1'

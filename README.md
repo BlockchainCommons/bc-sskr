@@ -31,7 +31,7 @@ This sequence runs the module's unit tests.
 2. After setting up the environment variables for the toolchain
 `$ source $HOME/emsdk/emsdk_env.sh`
  run `./build-wasm.sh`. This will build the wasm/`sskr.wasm` and wasm/`sskr.js` files
-3.    Run `./wasm/start-server.sh` and navigate to http://localhost:8888/sskr.html
+3. cd into wasm and run `./start-server.sh` and navigate to http://localhost:8888/sskr.html
 4.    You can edit `sskr.html`, save and refresh browser
 
 ## Usage Instructions
