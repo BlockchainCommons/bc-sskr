@@ -9,7 +9,7 @@
 #include "shard.h"
 #include "sskr-errors.h"
 
-#ifdef ARDUINO
+#if defined(ARDUINO) || defined(__EMSCRIPTEN__)
 #include "bc-shamir.h"
 #else
 #include <bc-shamir/bc-shamir.h>
