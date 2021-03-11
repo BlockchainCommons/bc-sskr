@@ -4,6 +4,7 @@
 # cd emsdk
 # source ./emsdk_env.sh
 
+git submodule update --init
 
 emcc -I./deps/bc-shamir/src/ -I./deps/bc-crypto-base/src/ \
 src/encoding.c deps/bc-shamir/src/shamir.c deps/bc-shamir/src/interpolate.c deps/bc-shamir/src/hazmat.c \
