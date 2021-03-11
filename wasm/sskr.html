@@ -80,9 +80,12 @@
 			var newFuncPtr = addFunction(function(bufferPointer, count, contextPointer) {
 				// this implements arandom number generator
 				// It is passed to a function pointer
-				var array = new Uint32Array(1);
+				var array = new Uint8Array(count);
 				window.crypto.getRandomValues(array);
-				setValue(bufferPointer, array[0], 'i32')
+				for (var i = 0; i < count; i++) {
+					setValue(bufferPointer + i, array[i], 'i8')
+				}
+
 			}, 'viii');
 
 			const {
