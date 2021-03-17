@@ -61,8 +61,9 @@ This table below also establishes provenance (repository of origin, permalink, a
 
 These are other projects that work with or leverage bc-sskr:
 
-- [seedtool](https://github.com/blockchaincommons/bc-seedtool-cli) — Tool for generating and transforming cryptographic seeds.
+* [Gordian Guardian](https://github.com/BlockchainCommons/GordianGuardian-iOS) — iPhone app for storing cryptographic seeds.
 - [LetheKit](https://github.com/BlockchainCommons/bc-lethekit) — Open source DIY hardware box for offline cryptographic tools.
+- [seedtool](https://github.com/blockchaincommons/bc-seedtool-cli) — Tool for generating and transforming cryptographic seeds.
 
 ### Derived from…
 
@@ -75,6 +76,8 @@ bc-sskr project is either derived from or was inspired by:
 To build the bc-sskr you'll need to use the following tools:
 
 - autotools - Gnu Build System from Free Software Foundation ([intro](https://www.gnu.org/software/automake/manual/html_node/Autotools-Introduction.html)).
+- [`bc-crypto-base`](https://github.com/blockchaincommons/bc-crypto-base) - base cryptography library
+- [`bc-shamir`](https://github.com/blockchaincommons/bc-shamir) - Shamir's Secret Sharing library
 
 ## Financial Support
 
