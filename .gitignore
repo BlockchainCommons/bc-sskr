@@ -96,3 +96,7 @@ config.log
 config.status
 configure.scan
 config.h
+
+# wasm
+*.wasm*
+sskr.js
