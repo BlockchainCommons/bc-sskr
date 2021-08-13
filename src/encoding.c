@@ -24,6 +24,10 @@ static size_t serialize_shard(
     uint8_t *destination,
     size_t destination_len) {
 
+    if(destination_len < METADATA_LENGTH_BYTES) {
+        return SSKR_ERROR_INSUFFICIENT_SPACE;
+    }
+
     // pack the id, group and member data into 5 bytes:
     // 76543210        76543210        76543210
     //         76543210        76543210
