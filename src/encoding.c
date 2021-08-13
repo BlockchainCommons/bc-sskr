@@ -19,6 +19,19 @@
 #include <string.h>
 #include <stdbool.h>
 
+static size_t check_secret_length(size_t len) {
+    if(len < MIN_STRENGTH_BYTES) {
+        return SSKR_ERROR_SECRET_TOO_SHORT;
+    }
+    if(len > MAX_STRENGTH_BYTES) {
+        return SSKR_ERROR_SECRET_TOO_LONG;
+    }
+    if(len & 1) {
+        return SSKR_ERROR_SECRET_LENGTH_NOT_EVEN;
+    }
+    return 0;
+}
+
 static size_t serialize_shard(
     const sskr_shard *shard,
     uint8_t *destination,
@@ -90,11 +103,9 @@ static int deserialize_shard(
     shard->value_len = source_len - METADATA_LENGTH_BYTES;
     memcpy(shard->value, source + METADATA_LENGTH_BYTES, shard->value_len);
 
-    if(shard->value_len < MIN_STRENGTH_BYTES) {
-        return SSKR_ERROR_SECRET_TOO_SHORT;
-    }
-    if(shard->value_len % 2) {
-        return SSKR_ERROR_INVALID_SECRET_LENGTH;
+    size_t err = check_secret_length(shard->value_len);
+    if(err) {
+        return err;
     }
     return shard->value_len;
 }
@@ -137,13 +148,9 @@ static int generate_shards(
     void* ctx,
     void (*random_generator)(uint8_t *, size_t, void*)
 ) {
-
-    if(master_secret_len < MIN_STRENGTH_BYTES) {
-        return SSKR_ERROR_SECRET_TOO_SHORT;
-    }
-
-    if(master_secret_len % 2 == 1) {
-        return SSKR_ERROR_INVALID_SECRET_LENGTH;
+    size_t err = check_secret_length(master_secret_len);
+    if(err) {
+        return err;
     }
 
     // Figure out how many shards we are dealing with
@@ -220,8 +227,9 @@ int sskr_generate(
     void* ctx,
     void (*random_generator)(uint8_t *, size_t, void*)
 ) {
-    if(master_secret_len < MIN_STRENGTH_BYTES) {
-        return SSKR_ERROR_SECRET_TOO_SHORT;
+    size_t err = check_secret_length(master_secret_len);
+    if(err) {
+        return err;
     }
 
     // Figure out how many shards we are dealing with
