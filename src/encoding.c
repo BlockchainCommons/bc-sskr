@@ -67,14 +67,14 @@ static int deserialize_shard(
     sskr_shard *shard
 ) {
     if(source_len < MIN_SERIALIZED_LENGTH_BYTES) {
-        return ERROR_NOT_ENOUGH_SERILIZED_BYTES;
+        return SSKR_ERROR_NOT_ENOUGH_SERILIZED_BYTES;
     }
 
     size_t group_threshold = (source[2] >> 4) + 1;
     size_t group_count = (source[2] & 0xf) + 1;
 
     if(group_threshold > group_count) {
-        return ERROR_INVALID_GROUP_THRESHOLD;
+        return SSKR_ERROR_INVALID_GROUP_THRESHOLD;
     }
 
     shard->identifier = ((uint16_t)source[0]) << 8 | source[1];
@@ -84,17 +84,17 @@ static int deserialize_shard(
     shard->member_threshold = (source[3] & 0xf) + 1;
     size_t reserved = source[4] >> 4;
     if(reserved != 0) {
-        return ERROR_INVALID_RESERVED_BITS;
+        return SSKR_ERROR_INVALID_RESERVED_BITS;
     }
     shard->member_index = source[4] & 0xf;
     shard->value_len = source_len - METADATA_LENGTH_BYTES;
     memcpy(shard->value, source + METADATA_LENGTH_BYTES, shard->value_len);
 
     if(shard->value_len < MIN_STRENGTH_BYTES) {
-        return ERROR_SECRET_TOO_SHORT;
+        return SSKR_ERROR_SECRET_TOO_SHORT;
     }
     if(shard->value_len % 2) {
-        return ERROR_INVALID_SECRET_LENGTH;
+        return SSKR_ERROR_INVALID_SECRET_LENGTH;
     }
     return shard->value_len;
 }
@@ -107,16 +107,16 @@ int sskr_count_shards(
     size_t shard_count = 0;
 
     if(group_threshold > groups_len) {
-        return ERROR_INVALID_GROUP_THRESHOLD;
+        return SSKR_ERROR_INVALID_GROUP_THRESHOLD;
     }
 
     for(int i = 0; i < groups_len; ++i) {
         shard_count += groups[i].count;
         if( groups[i].threshold > groups[i].count ) {
-            return ERROR_INVALID_MEMBER_THRESHOLD;
+            return SSKR_ERROR_INVALID_MEMBER_THRESHOLD;
         }
         if( groups[i].threshold == 1 && groups[i].count > 1) {
-            return ERROR_INVALID_SINGLETON_MEMBER;
+            return SSKR_ERROR_INVALID_SINGLETON_MEMBER;
         }
     }
 
@@ -139,11 +139,11 @@ static int generate_shards(
 ) {
 
     if(master_secret_len < MIN_STRENGTH_BYTES) {
-        return ERROR_SECRET_TOO_SHORT;
+        return SSKR_ERROR_SECRET_TOO_SHORT;
     }
 
     if(master_secret_len % 2 == 1) {
-        return ERROR_INVALID_SECRET_LENGTH;
+        return SSKR_ERROR_INVALID_SECRET_LENGTH;
     }
 
     // Figure out how many shards we are dealing with
@@ -157,11 +157,11 @@ static int generate_shards(
     random_generator((uint8_t *)(&identifier), 2, ctx);
 
     if(shards_size < total_shards) {
-        return ERROR_INSUFFICIENT_SPACE;
+        return SSKR_ERROR_INSUFFICIENT_SPACE;
     }
 
     if(group_threshold > groups_len) {
-        return ERROR_INVALID_GROUP_THRESHOLD;
+        return SSKR_ERROR_INVALID_GROUP_THRESHOLD;
     }
 
     uint8_t group_shares[master_secret_len * groups_len];
@@ -221,7 +221,7 @@ int sskr_generate(
     void (*random_generator)(uint8_t *, size_t, void*)
 ) {
     if(master_secret_len < MIN_STRENGTH_BYTES) {
-        return ERROR_SECRET_TOO_SHORT;
+        return SSKR_ERROR_SECRET_TOO_SHORT;
     }
 
     // Figure out how many shards we are dealing with
@@ -234,7 +234,7 @@ int sskr_generate(
     // and make sure that we were provided with sufficient resources
     size_t shard_length = METADATA_LENGTH_BYTES + master_secret_len;
     if(buffer_size < shard_length * total_shards) {
-        return ERROR_INSUFFICIENT_SPACE;
+        return SSKR_ERROR_INSUFFICIENT_SPACE;
     }
 
     int error = 0;
@@ -299,7 +299,7 @@ static int combine_shards_internal(
     size_t group_count = 0;
 
     if(shards_count == 0) {
-        return ERROR_EMPTY_SHARD_SET;
+        return SSKR_ERROR_EMPTY_SHARD_SET;
     }
 
     size_t next_group = 0;
@@ -322,7 +322,7 @@ static int combine_shards_internal(
                 shard->group_count != group_count ||
                 shard->value_len != secret_len
             ) {
-                return ERROR_INVALID_SHARD_SET;
+                return SSKR_ERROR_INVALID_SHARD_SET;
             }
         }
 
@@ -332,11 +332,11 @@ static int combine_shards_internal(
             if(shard->group_index == groups[j].group_index) {
                 group_found = true;
                 if(shard->member_threshold != groups[j].member_threshold) {
-                    return ERROR_INVALID_MEMBER_THRESHOLD;
+                    return SSKR_ERROR_INVALID_MEMBER_THRESHOLD;
                 }
                 for(int k = 0; k < groups[j].count; ++k) {
                     if(shard->member_index == groups[j].member_index[k]) {
-                        return ERROR_DUPLICATE_MEMBER_INDEX;
+                        return SSKR_ERROR_DUPLICATE_MEMBER_INDEX;
                     }
                 }
                 groups[j].member_index[groups[j].count] = shard->member_index;
@@ -357,9 +357,9 @@ static int combine_shards_internal(
     }
 
     if(buffer_len < secret_len) {
-        error = ERROR_INSUFFICIENT_SPACE;
+        error = SSKR_ERROR_INSUFFICIENT_SPACE;
     } else if(next_group < group_threshold) {
-        error = ERROR_NOT_ENOUGH_GROUPS;
+        error = SSKR_ERROR_NOT_ENOUGH_GROUPS;
     }
 
     // here, all of the shards are unpacked into member groups. Now we go through each
@@ -377,7 +377,7 @@ static int combine_shards_internal(
 
         gx[i] = g->group_index;
         if(g->count < g->member_threshold) {
-            error = ERROR_NOT_ENOUGH_MEMBER_SHARDS;
+            error = SSKR_ERROR_NOT_ENOUGH_MEMBER_SHARDS;
             break;
         }
 
@@ -428,7 +428,7 @@ static int combine_shards(
     size_t buffer_len      // total amount of working space
 ) {
     if(shards_count == 0) {
-        return ERROR_EMPTY_SHARD_SET;
+        return SSKR_ERROR_EMPTY_SHARD_SET;
     }
 
     sskr_shard working_shards[shards_count];
@@ -454,7 +454,7 @@ int sskr_combine(
     int result = 0;
 
     if(shards_count == 0) {
-        return ERROR_EMPTY_SHARD_SET;
+        return SSKR_ERROR_EMPTY_SHARD_SET;
     }
 
     sskr_shard shards[shards_count];
