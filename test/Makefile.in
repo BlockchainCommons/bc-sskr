@@ -27,7 +27,8 @@ RED=`tput setaf 1`
 GREEN=`tput setaf 2`
 RESET=`tput sgr0`
 
-CFLAGS += -g -O0
+CPPFLAGS += -D_FORTIFY_SOURCE=2
+CFLAGS += -g -O2 -fstack-protector-all
 
 .PHONY: all
 all: test
