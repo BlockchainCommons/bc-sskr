@@ -82,7 +82,7 @@ static int deserialize_shard(
     sskr_shard *shard
 ) {
     if(source_len < MIN_SERIALIZED_LENGTH_BYTES) {
-        return SSKR_ERROR_NOT_ENOUGH_SERILIZED_BYTES;
+        return SSKR_ERROR_NOT_ENOUGH_SERIALIZED_BYTES;
     }
 
     size_t group_threshold = (source[2] >> 4) + 1;
