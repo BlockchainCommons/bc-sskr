@@ -100,3 +100,5 @@ config.h
 # wasm
 *.wasm*
 sskr.js
+
+.vscode/*.log

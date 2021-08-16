@@ -10,8 +10,10 @@
 #include "sskr-errors.h"
 
 #if defined(ARDUINO) || defined(__EMSCRIPTEN__)
+#include "bc-crypto-base.h"
 #include "bc-shamir.h"
 #else
+#include <bc-crypto-base/bc-crypto-base.h>
 #include <bc-shamir/bc-shamir.h>
 #endif
 
@@ -195,18 +197,18 @@ static int generate_shards(
             shard->group_index = i;
             shard->member_threshold = groups[i].threshold;
             shard->member_index = j;
-            memset(shard->value, 0, 32);
+            memzero(shard->value, 32);
             memcpy(shard->value, value, master_secret_len);
 
             shards_count++;
         }
 
         // clean up
-        memset(member_shares, 0, sizeof(member_shares));
+        memzero(member_shares, sizeof(member_shares));
     }
 
     // clean up stack
-    memset(group_shares, 0, sizeof(group_shares));
+    memzero(group_shares, sizeof(group_shares));
 
     // return the number of shards generated
     return shards_count;
@@ -272,9 +274,9 @@ int sskr_generate(
         cur_output += byte_count;
     }
 
-    memset(shards, 0, sizeof(shards));
+    memzero(shards, sizeof(shards));
     if(error) {
-        memset(output, 0, buffer_size);
+        memzero(output, buffer_size);
         return 0;
     }
 
@@ -417,10 +419,10 @@ static int combine_shards_internal(
     }
 
     // clean up stack
-    memset(group_shares, 0, sizeof(group_shares));
-    memset(gx, 0, sizeof(gx));
-    memset(gy, 0, sizeof(gy));
-    memset(groups, 0, sizeof(groups));
+    memzero(group_shares, sizeof(group_shares));
+    memzero(gx, sizeof(gx));
+    memzero(gy, sizeof(gy));
+    memzero(groups, sizeof(groups));
 
     if(error) {
         return error;
@@ -444,7 +446,7 @@ static int combine_shards(
 
     int result = combine_shards_internal(working_shards, shards_count, buffer, buffer_len);
 
-    memset(working_shards,0, sizeof(working_shards));
+    memzero(working_shards, sizeof(working_shards));
 
     return result;
 }
@@ -481,7 +483,7 @@ int sskr_combine(
         result = combine_shards_internal(shards, shards_count, buffer, buffer_len);
     }
 
-    memset(shards,0,sizeof(shards));
+    memzero(shards, sizeof(shards));
 
     return result;
 }
