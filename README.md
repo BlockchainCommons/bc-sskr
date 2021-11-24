@@ -43,7 +43,11 @@ This sequence runs the module's unit tests.
 #include <bc-sskr/bc-sskr.h>
 ```
 
-## Notes for Maintainers
+## Design Notes
+
+The Blockchain Commons implementation of Shamir's Secret Sharing makes a decision to incorporate fragments of the hashed secret to reduce complexity and share size for sharding, and to allow the detection of malicious shares, but it comes at the cost of reducing the Information-Theoretic Security of Shamir's Secret Sharing to Computational Security.This was a thoughtful and purposeful decision that has also been adopted by others in the industry. We believe that it offers advantages to the secret-sharing scheme while maintaining a level of security congruent with any services that `bc-sskr` is likely to be used with, such as Bitcoin and other cryptocurrencies. Read [the SSKR security review](https://github.com/BlockchainCommons/bc-sskr/blob/master/SECURITY-REVIEW.md#1-bc-shamir-provides-only-computational-security-btm-019) for more information. 
+
+## Maintainer Notes
 
 Before accepting a PR that can affect build or unit tests, make sure the following sequence of commands succeeds:
 
