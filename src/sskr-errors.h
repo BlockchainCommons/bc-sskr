@@ -24,5 +24,7 @@
 #define SSKR_ERROR_NOT_ENOUGH_GROUPS               (-14)
 #define SSKR_ERROR_INVALID_SHARD_BUFFER            (-15)
 #define SSKR_ERROR_SECRET_TOO_LONG                 (-16)
+#define SSKR_ERROR_INVALID_GROUP_LENGTH            (-17)
+#define SSKR_ERROR_INVALID_GROUP_COUNT             (-18)
 
 #endif /* SSKR_ERRORS_H */
