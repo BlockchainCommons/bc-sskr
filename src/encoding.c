@@ -382,7 +382,7 @@ static int combine_shards_internal(
     uint8_t group_shares[secret_len * (group_threshold + 1)];
     uint8_t *group_share = group_shares;
 
-    for(uint8_t i = 0; !error && i < next_group; ++i) {
+    for(uint8_t i = 0; !error && i < (uint8_t) next_group; ++i) {
         sskr_group* g = &groups[i];
 
         gx[i] = g->group_index;
