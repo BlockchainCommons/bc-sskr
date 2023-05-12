@@ -4,6 +4,9 @@
 
 * <img src="https://github.com/BlockchainCommons/crypto-commons/blob/master/images/logos/crypto-commons-super-simple.png" width=16 valign="bottom">&nbsp;&nbsp; ***part of the [crypto commons](https://github.com/BlockchainCommons/crypto-commons/blob/master/README.md) technology family***
 
+[![Compilation & Tests](https://github.com/BlockchainCommons/bc-sskr/actions/workflows/ci.yml/badge.svg)](https://github.com/BlockchainCommons/bc-sskr/actions/workflows/ci.yml)
+[![Static Analysis](https://github.com/BlockchainCommons/bc-sskr/actions/workflows/static_anlyzer.yml/badge.svg)](https://github.com/BlockchainCommons/bc-sskr/actions/workflows/static_anlyzer.yml)
+
 **Blockchain Commons SSKR** is an implementation of [Sharded Secret Key Reconstruction (SSKR)](https://github.com/BlockchainCommons/Research/blob/master/papers/bcr-2020-011-sskr.md) for use in [Blockchain Commons](https://www.BlockchainCommons.com) Software Projects.
 
 ## Prerequisites

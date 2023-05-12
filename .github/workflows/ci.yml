@@ -1,25 +1,68 @@
-name: ci
+name: Compilation & Tests
 on: [push, pull_request]
 jobs:
-  build-MacOS:
+  build-macos:
+    name: Build on MacOS
     runs-on: macos-latest
     steps:
-    - uses: actions/checkout@v2
-    - run: brew install cppcheck
-    - run: git clone https://github.com/BlockchainCommons/bc-crypto-base.git && cd bc-crypto-base && ./configure && make && sudo make install
-    - run: git clone https://github.com/BlockchainCommons/bc-shamir.git && cd bc-shamir && ./configure && make && sudo make install
-    - run: ./configure
-    - run: make lint
-    - run: make check
-    - run: sudo make install
-    - run: make distcheck && make distclean
+      - name: Clone
+        uses: actions/checkout@v3
+        with:
+          submodules: true
+      - name: Install cppcheck
+        run: brew install cppcheck
+      - name: Install bc-crypto-base
+        run: |
+          cd deps/bc-crypto-base
+          ./configure
+          make
+          sudo make install
+      - name: Install bc-shamir
+        run: |
+          cd deps/bc-shamir
+          ./configure
+          make
+          sudo make install
+      - name: Analyse bc-sskr
+        run: |
+          ./configure
+          make lint
+      - name: Test bc-sskr
+        run: make check
+      - name: Install bc-sskr
+        run: sudo make install
+      - name: Check bc-sskr distribution
+        run: |
+          make distcheck
+          make distclean
 
-  build-Linux:
-    runs-on: ubuntu-18.04
+  build-linux:
+    name: Build on Linux
+    runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - run: git clone https://github.com/BlockchainCommons/bc-crypto-base.git && cd bc-crypto-base && ./configure && make && sudo make install
-    - run: git clone https://github.com/BlockchainCommons/bc-shamir.git && cd bc-shamir && ./configure && make && sudo make install
-    - run: ./configure && make check
-    - run: sudo make install
-    - run: make distcheck && make distclean
+      - name: Clone
+        uses: actions/checkout@v3
+        with:
+          submodules: true
+      - name: Install bc-crypto-base
+        run: |
+          cd deps/bc-crypto-base
+          ./configure
+          make
+          sudo make install
+      - name: Install bc-shamir
+        run: |
+          cd deps/bc-shamir
+          ./configure
+          make
+          sudo make install
+      - name: Test bc-sskr
+        run: |
+          ./configure
+          make check
+      - name: Install bc-sskr
+        run: sudo make install
+      - name: Check bc-sskr distribution
+        run: |
+          make distcheck
+          make distclean
